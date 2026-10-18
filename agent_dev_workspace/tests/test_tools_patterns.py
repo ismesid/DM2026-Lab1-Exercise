@@ -94,3 +94,58 @@ def test_mine_patterns_tfidf_fpgrowth():
     assert res_catB_sup4["patterns_count"] == 1
     assert res_catB_sup4["top_patterns"][0]["pattern"] == "gamma"
     assert res_catB_sup4["top_patterns"][0]["support"] == 4
+
+
+def test_mine_patterns_topk_and_maxfpgrowth():
+    """Test #20: topk and maxfpgrowth algorithms with tfidf filtering method."""
+    session = SessionState()
+    premade_tools, _ = load_workspace_tools("premade_tools", session)
+    load_dataset_tool = next(t for t in premade_tools if t.name == "load_dataset_tool")
+
+    load_dataset_tool.invoke({
+        "file_path": "agent_dev/sample_fixture.csv",
+        "text_column": "text",
+        "label_column": "label"
+    })
+
+    tools = make_tools(session)
+    mine_patterns_tool = next(t for t in tools if t.name == "mine_patterns_tool")
+
+    # 1. algorithm="topk" with k=1, 2, 3 for catA and catB
+    for k_val in [1, 2, 3]:
+        # catA
+        res_catA = mine_patterns_tool.invoke({
+            "category_name": "catA",
+            "filtering_method": "tfidf",
+            "algorithm": "topk",
+            "k": k_val
+        })
+        assert res_catA["status"] == "success"
+        assert res_catA["patterns_count"] == 1
+        assert res_catA["top_patterns"][0]["pattern"] == "alpha"
+        assert res_catA["top_patterns"][0]["support"] == 3
+
+        # catB
+        res_catB = mine_patterns_tool.invoke({
+            "category_name": "catB",
+            "filtering_method": "tfidf",
+            "algorithm": "topk",
+            "k": k_val
+        })
+        assert res_catB["status"] == "success"
+        assert res_catB["patterns_count"] == 1
+        assert res_catB["top_patterns"][0]["pattern"] == "gamma"
+        assert res_catB["top_patterns"][0]["support"] == 4
+
+    # 2. algorithm="maxfpgrowth" with min_sup=1 and 4 for catA and catB
+    for min_sup_val in [1, 4]:
+        for category in ["catA", "catB"]:
+            res_max = mine_patterns_tool.invoke({
+                "category_name": category,
+                "filtering_method": "tfidf",
+                "algorithm": "maxfpgrowth",
+                "min_sup": min_sup_val
+            })
+            assert res_max["status"] == "success"
+            assert res_max["patterns_count"] == 0
+            assert res_max["top_patterns"] == []
