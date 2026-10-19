@@ -186,7 +186,7 @@ result_id: `reduce_dimensions_19`
 
 The PCA plot has a dense group near the origin and a few distant points, with all three sentiment colors represented among the outliers. The classes overlap heavily.
 
-An **additional CSV check**, rebuilding the same DTM and using two-component PCA with `random_state=42`, gives **26.7%** explained variance for PC1 and **5.1%** for PC2. PC1's correlation with the total token count per document is **0.947**. Here, token count means the sum of a DTM row, distinct from the character lengths shown earlier.
+An **additional CSV check**, rebuilding the same DTM and using two-component PCA, gives **26.7%** explained variance for PC1 and **5.1%** for PC2. PC1's correlation with the total token count per document is **0.947**. Here, token count means the sum of a DTM row, distinct from the character lengths shown earlier.
 
 This is strong evidence that document length is associated with the main direction in this plot. It made me revise my earlier expectation: even though most comments are short and the class medians are fairly close, raw counts still vary substantially with text length. However, PC1 is not literally a length measurement, and this result does not prove that length causes every correlation in the heatmap.
 
